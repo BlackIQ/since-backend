@@ -23,7 +23,16 @@ async def list_counters(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    pass
+    db_counters = (
+        db.query(Counter)
+        .where(
+            Counter.user_id == user.id,
+            Counter.deleted_at == None,
+        )
+        .all()
+    )
+
+    return db_counters
 
 
 @router.get("/{counter_id}", response_model=CounterRead)
@@ -32,7 +41,23 @@ async def get_counter(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    pass
+    db_counter = (
+        db.query(Counter)
+        .where(
+            Counter.id == counter_id,
+            Counter.user_id == user.id,
+            Counter.deleted_at == None,
+        )
+        .one_or_none()
+    )
+
+    if not db_counter:
+        raise HTTPException(
+            status_code=404,
+            detail="Counter not found",
+        )
+
+    return db_counter
 
 
 @router.post("", response_model=CounterRead)
@@ -41,7 +66,13 @@ async def create_counter(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    pass
+    db_counter = Counter(**counter_data.model_dump(), user_id=user.id)
+
+    db.add(db_counter)
+    db.commit()
+    db.refresh(db_counter)
+
+    return db_counter
 
 
 @router.patch("/{counter_id}", response_model=CounterRead)
@@ -51,7 +82,29 @@ async def update_counter(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    pass
+    db_counter = (
+        db.query(Counter)
+        .where(
+            Counter.id == counter_id,
+            Counter.user_id == user.id,
+            Counter.deleted_at == None,
+        )
+        .one_or_none()
+    )
+
+    if not db_counter:
+        raise HTTPException(
+            status_code=404,
+            detail="Counter not found",
+        )
+
+    for key, value in counter_data.model_dump(exclude_unset=True).items():
+        setattr(db_counter, key, value)
+
+    db.commit()
+    db.refresh(db_counter)
+
+    return db_counter
 
 
 @router.delete("/{counter_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -60,4 +113,25 @@ async def delete_counter(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    db_counter = (
+        db.query(Counter)
+        .where(
+            Counter.id == counter_id,
+            Counter.user_id == user.id,
+            Counter.deleted_at == None,
+        )
+        .one_or_none()
+    )
+
+    if not db_counter:
+        raise HTTPException(
+            status_code=404,
+            detail="Counter not found",
+        )
+
+    db_counter.deleted_at = datetime.now(timezone.utc)
+
+    db.commit()
+    db.refresh(db_counter)
+
     return None
