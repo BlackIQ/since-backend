@@ -15,8 +15,6 @@ class CounterCreate(BaseSchema):
     visibility: VisibilityType
     status: StatusType
 
-    user_id: uuid.UUID
-
 
 # Update Counter Schema
 class CounterUpdate(BaseSchema):
