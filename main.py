@@ -3,7 +3,7 @@ from fastapi import FastAPI  # FastAPI
 from fastapi.middleware.cors import CORSMiddleware  # FastAPI CORS
 
 # Application
-from routers import auth, counter
+from routers import auth, counter, user
 
 # FastAPI
 app: FastAPI = FastAPI(
@@ -12,6 +12,7 @@ app: FastAPI = FastAPI(
     summary="BackEnd service of Since.",
     openapi_tags=[
         {"name": "Authentication", "description": "Authentication endpoints"},
+        {"name": "User", "description": "User endpoints"},
         {"name": "Counter", "description": "Counter endpoints"},
     ],
     servers=[
@@ -43,4 +44,5 @@ app.add_middleware(
 
 # Routers
 app.include_router(auth.router, prefix="/api")  # Authentication
+app.include_router(user.router, prefix="/api")  # User
 app.include_router(counter.router, prefix="/api")  # Counter
