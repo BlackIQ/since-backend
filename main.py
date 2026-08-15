@@ -33,6 +33,8 @@ app.add_middleware(
     allow_origins=[
         "https://since.amirhossein.info",
         "http://localhost:3000",
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
         "http://127.0.0.1:3000",
     ],
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
