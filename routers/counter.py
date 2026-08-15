@@ -53,7 +53,7 @@ async def get_counter(
 
     if not db_counter:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Counter not found",
         )
 
@@ -94,7 +94,7 @@ async def update_counter(
 
     if not db_counter:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Counter not found",
         )
 
@@ -125,7 +125,7 @@ async def delete_counter(
 
     if not db_counter:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Counter not found",
         )
 
