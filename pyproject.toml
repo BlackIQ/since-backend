@@ -16,3 +16,9 @@ dependencies = [
     "sqlalchemy>=2.0.52",
     "websockets>=17.0.1",
 ]
+
+[tool.fastapi]
+entrypoint = "main:app"
+
+[tool.vercel]
+entrypoint = "main:app"
