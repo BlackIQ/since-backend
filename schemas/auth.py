@@ -6,7 +6,7 @@ from pydantic import field_validator
 
 # Application
 from base.schema import BaseSchema  # Base
-from security.password import validate_password_strength  # Password
+from utils.password import validate_password_strength  # Password
 
 
 # Email Schema
@@ -56,6 +56,7 @@ class SignupSchema(BaseEmailSchema, BasePasswordSchema):
     # password: str
 
     display_name: str
+    username: str
     first_name: str | None = None
     last_name: str | None = None
 
