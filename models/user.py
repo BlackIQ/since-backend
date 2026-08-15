@@ -33,9 +33,11 @@ class User(BaseModel):
         nullable=False,
     )
     first_name: Mapped[str | None] = mapped_column(
+        default="",
         nullable=True,
     )
     last_name: Mapped[str | None] = mapped_column(
+        default="",
         nullable=True,
     )
     is_confirmed: Mapped[bool] = mapped_column(
