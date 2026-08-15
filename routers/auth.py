@@ -36,14 +36,14 @@ async def signup(
     db: Session = Depends(get_db),
 ):
     email_exists = db.query(User).where(User.email == data.email).first()
-    if not email_exists:
+    if email_exists:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Email already exists",
         )
 
     username_exists = db.query(User).where(User.username == data.username).first()
-    if not username_exists:
+    if username_exists:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Username already exists",
@@ -60,7 +60,7 @@ async def signup(
         is_active=True,
     )
 
-    db.add(User)
+    db.add(user)
     db.commit()
 
     token = create_confirmation_token(user.email)
