@@ -6,6 +6,7 @@ import uuid  # UUID
 from base.schema import BaseSchema  # Base
 from enums.visibility import VisibilityType  # Visibility Enum
 from enums.status import StatusType  # Status Enum
+from schemas.period import PeriodRead  # Schema Period
 
 
 # Create Counter Schema
@@ -32,8 +33,7 @@ class CounterRead(CounterCreate):
     status: StatusType
     visibility: VisibilityType
 
-    started_at: datetime
-    ended_at: datetime | None
+    periods: list[PeriodRead]
 
     created_at: datetime
     updated_at: datetime
