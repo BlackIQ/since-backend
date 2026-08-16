@@ -183,6 +183,8 @@ async def restart_counter(
             detail="Counter not found",
         )
 
+    now = datetime.now(timezone.utc)
+
     db_period = (
         db.query(Period)
         .where(
@@ -194,19 +196,16 @@ async def restart_counter(
     )
 
     if db_period:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Counter is already active",
-        )
+        db_period.ended_at = now
 
-    db_period = Period(
+    new_period = Period(
         counter_id=db_counter.id,
-        started_at=datetime.now(timezone.utc),
+        started_at=now,
     )
 
     db_counter.status = StatusType.ACTIVE
 
-    db.add(db_period)
+    db.add(new_period)
     db.commit()
     db.refresh(db_counter)
 
