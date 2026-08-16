@@ -154,3 +154,55 @@ async def delete_counter(
     db.refresh(db_counter)
 
     return None
+
+
+@router.post("/{counter_id}/restart")
+async def restart_counter(
+    counter_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    db_counter = (
+        db.query(Counter)
+        .where(
+            Counter.id == counter_id,
+            Counter.user_id == user.id,
+            Counter.deleted_at == None,
+        )
+        .one_or_none()
+    )
+
+    if not db_counter:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Counter not found",
+        )
+
+    db_period = (
+        db.query(Period)
+        .where(
+            Period.counter_id == counter_id,
+            Period.ended_at == None,
+            Period.deleted_at == None,
+        )
+        .one_or_none()
+    )
+
+    if db_period:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Counter is already active",
+        )
+
+    db_period = Period(
+        counter_id=db_counter.id,
+        started_at=datetime.now(timezone.utc),
+    )
+
+    db_counter.status = StatusType.ACTIVE
+
+    db.add(db_period)
+    db.commit()
+    db.refresh(db_counter)
+
+    return db_counter
