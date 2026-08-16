@@ -37,3 +37,16 @@ class CounterRead(CounterCreate):
 
     created_at: datetime
     updated_at: datetime
+
+
+# Share Counter Schema
+class SharedCounterRead(BaseSchema):
+    id: uuid.UUID
+
+    title: str
+    description: str
+
+    started_at: datetime
+    ended_at: datetime | None
+
+    status: StatusType

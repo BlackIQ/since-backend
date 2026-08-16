@@ -9,7 +9,12 @@ from dependencies.database import get_db  # Dependency: Database
 from dependencies.token import get_current_user  # Dependency: Token
 from enums.status import StatusType  # Enum: Status
 from enums.visibility import VisibilityType  # Enum: Visibility
-from schemas.counter import CounterCreate, CounterUpdate, CounterRead  # Schema: Counter
+from schemas.counter import (
+    CounterCreate,
+    CounterUpdate,
+    CounterRead,
+    SharedCounterRead,
+)  # Schema: Counter
 from models.user import User  # Model: User
 from models.counter import Counter  # Model: Counter
 from models.period import Period  # Model: Period
@@ -253,3 +258,44 @@ async def complete_counter(
     db.refresh(db_counter)
 
     return db_counter
+
+
+@router.get("/{counter_id}/public", response_model=SharedCounterRead)
+async def public_counter(
+    counter_id: uuid.UUID,
+    db: Session = Depends(get_db),
+):
+    db_counter = (
+        db.query(Counter)
+        .where(
+            Counter.id == counter_id,
+            Counter.visibility == VisibilityType.PUBLIC,
+            Counter.deleted_at == None,
+        )
+        .one_or_none()
+    )
+
+    if not db_counter:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Counter not found",
+        )
+
+    db_period = (
+        db.query(Period)
+        .where(
+            Period.counter_id == db_counter.id,
+            Period.deleted_at == None,
+        )
+        .order_by(Period.started_at.desc())
+        .first()
+    )
+
+    return SharedCounterRead(
+        id=db_counter.id,
+        title=db_counter.title,
+        description=db_counter.description,
+        started_at=db_period.started_at,
+        ended_at=db_period.ended_at,
+        status=db_counter.status,
+    )
