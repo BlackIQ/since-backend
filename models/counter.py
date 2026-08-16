@@ -53,4 +53,5 @@ class Counter(BaseModel):
     periods: Mapped[list["Period"]] = relationship(
         "Period",
         back_populates="counter",
+        cascade="all, delete-orphan",
     )
