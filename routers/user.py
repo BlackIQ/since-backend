@@ -35,7 +35,7 @@ async def me(
     )
 
     if not db_user:
-        HTTPException(
+        raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
         )
@@ -58,7 +58,7 @@ async def change_profile(
     )
 
     if not db_user:
-        HTTPException(
+        raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
         )
@@ -87,7 +87,7 @@ async def change_email(
     )
 
     if not db_user:
-        HTTPException(
+        raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
         )
@@ -122,7 +122,7 @@ async def change_password(
     )
 
     if not db_user:
-        HTTPException(
+        raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
         )
