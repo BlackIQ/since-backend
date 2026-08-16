@@ -22,13 +22,16 @@ class CounterUpdate(BaseSchema):
     title: str | None = None
     description: str | None = None
 
-    status: StatusType
-    visibility: VisibilityType
+    status: StatusType | None = None
+    visibility: VisibilityType | None = None
 
 
 # Read Counter Schema
-class CounterRead(CounterCreate):
+class CounterRead(BaseSchema):
     id: uuid.UUID
+
+    title: str
+    description: str
 
     status: StatusType
     visibility: VisibilityType
