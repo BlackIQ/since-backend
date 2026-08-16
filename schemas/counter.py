@@ -12,21 +12,28 @@ from enums.status import StatusType  # Status Enum
 class CounterCreate(BaseSchema):
     title: str
     description: str
-    visibility: VisibilityType
-    status: StatusType
+
+    started_at: datetime
 
 
 # Update Counter Schema
 class CounterUpdate(BaseSchema):
     title: str | None = None
     description: str | None = None
-    visibility: VisibilityType
+
     status: StatusType
+    visibility: VisibilityType
 
 
 # Read Counter Schema
 class CounterRead(CounterCreate):
     id: uuid.UUID
+
+    status: StatusType
+    visibility: VisibilityType
+
+    started_at: datetime
+    ended_at: datetime | None
 
     created_at: datetime
     updated_at: datetime
