@@ -133,7 +133,7 @@ async def change_password(
             detail="Current password is not same",
         )
 
-    if hash_password(data.new_password) != hash_password(data.confirm_password):
+    if data.new_password != data.confirm_password:
         raise HTTPException(
             status_code=409,
             detail="New password is not same as confirm",
