@@ -7,9 +7,12 @@ import uuid  # UUID
 # Application
 from dependencies.database import get_db  # Dependency: Database
 from dependencies.token import get_current_user  # Dependency: Token
+from enums.status import StatusType  # Enum: Status
+from enums.visibility import VisibilityType  # Enum: Visibility
 from schemas.counter import CounterCreate, CounterUpdate, CounterRead  # Schema: Counter
 from models.user import User  # Model: User
 from models.counter import Counter  # Model: Counter
+from models.period import Period  # Model: Period
 
 # Router
 router = APIRouter(
@@ -66,11 +69,27 @@ async def create_counter(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    db_counter = Counter(**counter_data.model_dump(), user_id=user.id)
+    db_counter = Counter(
+        title=counter_data.title,
+        description=counter_data.description,
+        user_id=user.id,
+        status=StatusType.ACTIVE,
+        visibility=VisibilityType.PRIVATE,
+    )
 
     db.add(db_counter)
+    db.flush()
+
+    db_period = Period(
+        counter_id=db_counter.id,
+        started_at=counter_data.started_at,
+    )
+
+    db.add(db_period)
     db.commit()
+
     db.refresh(db_counter)
+    db.refresh(db_period)
 
     return db_counter
 
