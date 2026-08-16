@@ -156,7 +156,7 @@ async def delete_counter(
     return None
 
 
-@router.post("/{counter_id}/restart")
+@router.post("/{counter_id}/restart", response_model=CounterRead)
 async def restart_counter(
     counter_id: uuid.UUID,
     db: Session = Depends(get_db),
@@ -208,7 +208,7 @@ async def restart_counter(
     return db_counter
 
 
-@router.post("/{counter_id}/complete")
+@router.post("/{counter_id}/complete", response_model=CounterRead)
 async def complete_counter(
     counter_id: uuid.UUID,
     db: Session = Depends(get_db),
