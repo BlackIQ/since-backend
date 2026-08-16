@@ -39,8 +39,8 @@ class CounterRead(CounterCreate):
     updated_at: datetime
 
 
-# Share Counter Schema
-class SharedCounterRead(BaseSchema):
+# Public Counter Schema
+class PublicCounterRead(BaseSchema):
     id: uuid.UUID
 
     title: str

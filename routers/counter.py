@@ -13,7 +13,7 @@ from schemas.counter import (
     CounterCreate,
     CounterUpdate,
     CounterRead,
-    SharedCounterRead,
+    PublicCounterRead,
 )  # Schema: Counter
 from models.user import User  # Model: User
 from models.counter import Counter  # Model: Counter
@@ -260,7 +260,7 @@ async def complete_counter(
     return db_counter
 
 
-@router.get("/{counter_id}/public", response_model=SharedCounterRead)
+@router.get("/{counter_id}/public", response_model=PublicCounterRead)
 async def public_counter(
     counter_id: uuid.UUID,
     db: Session = Depends(get_db),
@@ -291,7 +291,7 @@ async def public_counter(
         .first()
     )
 
-    return SharedCounterRead(
+    return PublicCounterRead(
         id=db_counter.id,
         title=db_counter.title,
         description=db_counter.description,
