@@ -127,7 +127,7 @@ async def change_password(
             detail="User not found",
         )
 
-    if not verify_password(user.password_hash, hash_password(data.current_password)):
+    if not verify_password(data.current_password, user.password_hash):
         raise HTTPException(
             status_code=409,
             detail="Current password is not same",
