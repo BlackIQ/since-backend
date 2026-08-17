@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     # Frontend
     frontend_url: str = ""
 
+    # Resend
+    resend_apikey: str = ""
+
     model_config = SettingsConfigDict(env_file=".env")
 
 
