@@ -1,10 +1,24 @@
 # Libs
-from fastapi import APIRouter, Depends, HTTPException, status  # FastAPI
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    status,
+)  # FastAPI
 from sqlalchemy.orm import Session  # SQLALchemy
 
 # Application
 from core.settings import settings  # Core: Settings
 from dependencies.database import get_db  # Dependency: Database
+from utils.mail import send_email, MailSender  # Util: Send mail
+from utils.mail_templates import (
+    get_forgot_password_email,
+    get_password_changed_email,
+    get_signin_notification_email,
+    get_signup_email,
+    get_welcome_email,
+)
 from utils.password import hash_password, verify_password  # Utils: Password
 from utils.token import (
     create_token,
@@ -33,6 +47,7 @@ router = APIRouter(
 @router.post("/signup", response_model=MessageSchema)
 async def signup(
     data: SignupSchema,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
     email_exists = db.query(User).where(User.email == data.email).first()
@@ -66,8 +81,13 @@ async def signup(
     token = create_confirmation_token(user.email)
     confirmation_url = f"{settings.frontend_url}/auth?token={token}"
 
-    # TODO: Send Confirmation Email
-    print(confirmation_url)
+    background_tasks.add_task(
+        send_email,
+        sender=MailSender.INFO,
+        to=user.email,
+        subject="Confirm your Since account",
+        content=get_signup_email(confirmation_url),
+    )
 
     return MessageSchema(
         message="Registration successful. Please check your email to confirm your account.",
@@ -77,6 +97,7 @@ async def signup(
 @router.post("/signin", response_model=TokenSchema)
 async def signin(
     data: SigninSchema,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
     user = db.query(User).where(User.email == data.email).first()
@@ -107,7 +128,13 @@ async def signin(
 
     access_token = create_token(user.id)
 
-    # TODO: Send Security email
+    background_tasks.add_task(
+        send_email,
+        sender=MailSender.SECURITY,
+        to=user.email,
+        subject="Security Alert: New Sign-in to Since",
+        content=get_signin_notification_email(),
+    )
 
     return TokenSchema(
         access_token=access_token,
@@ -118,6 +145,7 @@ async def signin(
 @router.get("/confirm-email", response_model=MessageSchema)
 async def confirm_email(
     token: str,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
     email = verify_confirmation_token(token)
@@ -142,7 +170,13 @@ async def confirm_email(
     user.is_confirmed = True
     db.commit()
 
-    # TODO: Send Welcome email
+    background_tasks.add_task(
+        send_email,
+        sender=MailSender.INFO,
+        to=user.email,
+        subject="Welcome to Since!",
+        content=get_welcome_email(),
+    )
 
     return MessageSchema(
         message="Your email has been confirmed and account activated. Please sign in.",
@@ -152,6 +186,7 @@ async def confirm_email(
 @router.post("/resend-confirmation", response_model=MessageSchema)
 async def resend_confirmation(
     data: ResendConfirmationSchema,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
     user = db.query(User).where(User.email == data.email).first()
@@ -172,8 +207,13 @@ async def resend_confirmation(
     token = create_confirmation_token(user.email)
     confirmation_url = f"{settings.frontend_url}/auth?token={token}"
 
-    # TODO: Send Confirmation Email
-    print(confirmation_url)
+    background_tasks.add_task(
+        send_email,
+        sender=MailSender.INFO,
+        to=user.email,
+        subject="Confirm your Since account",
+        content=get_signup_email(confirmation_url),
+    )
 
     return generic_message
 
@@ -181,6 +221,7 @@ async def resend_confirmation(
 @router.post("/forgot-password", response_model=MessageSchema)
 async def forgot_password(
     data: ForgotPasswordSchema,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
     user = db.query(User).where(User.email == data.email).first()
@@ -195,8 +236,13 @@ async def forgot_password(
     token = create_reset_password_token(user.email)
     reset_url = f"{settings.frontend_url}/auth?reset_token={token}"
 
-    # TODO: Send Reset Email
-    print(reset_url)
+    background_tasks.add_task(
+        send_email,
+        sender=MailSender.SECURITY,
+        to=user.email,
+        subject="Reset your Since Password",
+        content=get_forgot_password_email(reset_url),
+    )
 
     return generic_message
 
@@ -204,6 +250,7 @@ async def forgot_password(
 @router.post("/reset-password", response_model=MessageSchema)
 async def reset_password(
     data: ResetPasswordSchema,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
     if data.new_password != data.confirm_password:
@@ -229,7 +276,13 @@ async def reset_password(
     user.password_hash = hash_password(data.new_password)
     db.commit()
 
-    # TODO: Send Change Password Email
+    background_tasks.add_task(
+        send_email,
+        sender=MailSender.SECURITY,
+        to=user.email,
+        subject="Your Since password has been changed",
+        content=get_password_changed_email(),
+    )
 
     return MessageSchema(
         message="Password has been reset successfully. Please sign in with your new password.",
